@@ -1236,6 +1236,7 @@ void WindowFocus()
 
             GetWindowRect(GetDesktopWindow(), &rcDesktop);
             SetWindowPos(hWnd, HWND_TOP, 0, 0, rcDesktop.right, rcDesktop.bottom, NULL);
+            spdlog::info("Window Focus: Set borderless windowed mode.");
         }
     }
 }
