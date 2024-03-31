@@ -45,6 +45,7 @@ int iResX = 1920;
 int iResY = 1080;
 float fDefMinimapMulti = 0.0007812500116f;
 int iOrigMinimapWidthOffset = 0;
+int iFullscreenMode;
 LPCWSTR sWindowClassName = L"Dragon’s Dogma: Dark Arisen";
 
 HWND hWnd;
@@ -149,13 +150,13 @@ void ReadConfig()
 void GetResolution()
 {
     // Get current resolution
-    uint8_t* CurrentResolutionScanResult = Memory::PatternScan(baseModule, "74 ?? 8B ?? ?? ?? ?? 00 8B ?? ?? ?? ?? 00 89 ?? ?? ?? 89 ?? ?? ?? EB ??");
+    uint8_t* CurrentResolutionScanResult = Memory::PatternScan(baseModule, "83 ?? 08 8B ?? 89 ?? 8B ?? ?? ?? ?? ?? 8B ?? 89 ?? ?? E8 ?? ?? ?? ?? 8B ?? 89 ?? ?? ?? 3B ?? 75 ??") + 0xD;
     if (CurrentResolutionScanResult)
     {
         spdlog::info("Current Resolution: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)CurrentResolutionScanResult - (uintptr_t)baseModule);
 
         static SafetyHookMid CurrentResolutionMidHook{};
-        CurrentResolutionMidHook = safetyhook::create_mid(CurrentResolutionScanResult + 0xE,
+        CurrentResolutionMidHook = safetyhook::create_mid(CurrentResolutionScanResult,
             [](SafetyHookContext& ctx)
             {
                 iResX = (int)ctx.ecx;
@@ -176,6 +177,16 @@ void GetResolution()
                     fHUDWidthOffset = 0;
                     fHUDHeightOffset = (float)(iResY - fHUDHeight) / 2;
                 }
+
+                // Log aspect ratio stuff
+                spdlog::info("----------");
+                spdlog::info("Current Resolution: Resolution: {}x{}", iResX, iResY);
+                spdlog::info("Current Resolution: fAspectRatio: {}", fAspectRatio);
+                spdlog::info("Current Resolution: fAspectMultiplier: {}", fAspectMultiplier);
+                spdlog::info("Current Resolution: fHUDWidth: {}", fHUDWidth);
+                spdlog::info("Current Resolution: fHUDHeight: {}", fHUDHeight);
+                spdlog::info("Current Resolution: fHUDWidthOffset: {}", fHUDWidthOffset);
+                spdlog::info("Current Resolution: fHUDHeightOffset: {}", fHUDHeightOffset);
             });
     }
     else if (!CurrentResolutionScanResult)
@@ -1219,25 +1230,45 @@ void WindowFocus()
     }
     else
     {
+        // Get window mode and apply borderless styles
+        uint8_t* WindowModeScanResult = Memory::PatternScan(baseModule, "80 ?? ?? 00 74 ?? 8B ?? ?? 8B ?? ?? ?? ?? 00 3B ?? ?? ?? ?? 00");
+        if (WindowModeScanResult)
+        {
+            spdlog::info("WindowMode: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)WindowModeScanResult - (uintptr_t)baseModule);
+
+            static SafetyHookMid WindowModeMidHook{};
+            WindowModeMidHook = safetyhook::create_mid(WindowModeScanResult,
+                [](SafetyHookContext& ctx)
+                {
+                    if (ctx.edi + 0x23)
+                    {
+                        iFullscreenMode = *reinterpret_cast<BYTE*>(ctx.edi + 0x23);
+
+                        if (bBorderlessWindowed && iFullscreenMode == 0)
+                        {
+                            LONG lStyle = GetWindowLong(hWnd, GWL_STYLE);
+                            LONG lExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
+
+                            lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MAXIMIZE | WS_MINIMIZE);
+                            lExStyle &= ~(WS_EX_DLGMODALFRAME | WS_EX_COMPOSITED | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_LAYERED | WS_EX_STATICEDGE | WS_EX_TOOLWINDOW | WS_EX_APPWINDOW);
+
+                            SetWindowLong(hWnd, GWL_STYLE, lStyle);
+                            SetWindowLong(hWnd, GWL_EXSTYLE, lExStyle);
+
+                            GetWindowRect(GetDesktopWindow(), &rcDesktop);
+                            SetWindowPos(hWnd, HWND_TOP, 0, 0, rcDesktop.right, rcDesktop.bottom, NULL);
+                        }
+                    }
+                });
+        }
+        else if (!WindowModeScanResult)
+        {
+            spdlog::error("WindowMode: Pattern scan failed.");
+        }
+
         // Set new wnd proc
         OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)NewWndProc);
         spdlog::info("Window Focus: Set new WndProc.");
-
-        if (bBorderlessWindowed)
-        {
-            LONG lStyle = GetWindowLong(hWnd, GWL_STYLE);
-            LONG lExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
-
-            lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MAXIMIZE | WS_MINIMIZE);
-            lExStyle &= ~(WS_EX_DLGMODALFRAME | WS_EX_COMPOSITED | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_LAYERED | WS_EX_STATICEDGE | WS_EX_TOOLWINDOW | WS_EX_APPWINDOW);
-
-            SetWindowLong(hWnd, GWL_STYLE, lStyle);
-            SetWindowLong(hWnd, GWL_EXSTYLE, lExStyle);
-
-            GetWindowRect(GetDesktopWindow(), &rcDesktop);
-            SetWindowPos(hWnd, HWND_TOP, 0, 0, rcDesktop.right, rcDesktop.bottom, NULL);
-            spdlog::info("Window Focus: Set borderless windowed mode.");
-        }
     }
 }
 
