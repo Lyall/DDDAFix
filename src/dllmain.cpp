@@ -34,8 +34,9 @@ float fHUDHeightOffset;
 
 // Ini variables
 int iInjectionDelay;
-bool bPauseOnFocusLoss;
+bool bDisablePauseOnFocusLoss;
 bool bUncapFPS;
+bool bBorderlessWindowed;
 bool bFixHUD;
 bool bFixFOV;
 
@@ -126,16 +127,20 @@ void ReadConfig()
     // Read ini file
     inipp::get_value(ini.sections["DDDAFix Parameters"], "InjectionDelay", iInjectionDelay);
     inipp::get_value(ini.sections["Raise Framerate Cap"], "Enabled", bUncapFPS);
-    inipp::get_value(ini.sections["Pause on Focus Loss"], "Enabled", bPauseOnFocusLoss);
+    inipp::get_value(ini.sections["DisablePause on Focus Loss"], "Enabled", bDisablePauseOnFocusLoss);
+    inipp::get_value(ini.sections["Borderless Windowed Mode"], "Enabled", bBorderlessWindowed);
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bFixHUD);
     inipp::get_value(ini.sections["Fix FOV"], "Enabled", bFixFOV);
 
     // Log config parse
     spdlog::info("Config Parse: iInjectionDelay: {}ms", iInjectionDelay);
     spdlog::info("Config Parse: bUncapFPS: {}", bUncapFPS);
-    spdlog::info("Config Parse: bPauseOnFocusLoss: {}", bPauseOnFocusLoss);
+    spdlog::info("Config Parse: bDisablePauseOnFocusLoss: {}", bDisablePauseOnFocusLoss);
+    spdlog::info("Config Parse: bBorderlessWindowed: {}", bBorderlessWindowed);
     spdlog::info("Config Parse: bFixHUD: {}", bFixHUD);
     spdlog::info("Config Parse: bFixFOV: {}", bFixFOV);
+
+    spdlog::info("----------");
 }
 
 void GetResolution()
@@ -556,31 +561,6 @@ void Markers()
     {
         spdlog::error("Markers: Pattern scan failed.");
     }
-}
-
-void FOV()
-{
-    // Cutscene FOV
-    uint8_t* CutsceneFOVScanResult = Memory::PatternScan(baseModule, "76 ?? 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? F3 0F ?? ?? ?? 8B ?? ?? ?? 83 ?? ??");
-    if (CutsceneFOVScanResult)
-    {
-        spdlog::info("FOV: CutsceneFOV: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)CutsceneFOVScanResult - (uintptr_t)baseModule);
-
-        static SafetyHookMid CutsceneFOVMidHook{};
-        CutsceneFOVMidHook = safetyhook::create_mid(CutsceneFOVScanResult + 0x5,
-            [](SafetyHookContext& ctx)
-            {
-                if (fAspectRatio > fNativeAspect)
-                {
-                    ctx.xmm0.f32[0] = atanf(tanf(ctx.xmm0.f32[0] * (fPi / 360)) / fNativeAspect * fAspectRatio) * (360 / fPi);
-                }
-            });
-    }
-    else if (!CutsceneFOVScanResult)
-    {
-        spdlog::error("FOV: CutsceneFOV: Pattern scan failed.");
-    }
-    
 }
 
 void Minimap()
@@ -1145,9 +1125,36 @@ void Movie()
     }
 }
 
+void FOV()
+{
+    if (bFixFOV)
+    {
+        // Cutscene FOV
+        uint8_t* CutsceneFOVScanResult = Memory::PatternScan(baseModule, "76 ?? 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? F3 0F ?? ?? ?? 8B ?? ?? ?? 83 ?? ??");
+        if (CutsceneFOVScanResult)
+        {
+            spdlog::info("FOV: CutsceneFOV: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)CutsceneFOVScanResult - (uintptr_t)baseModule);
+
+            static SafetyHookMid CutsceneFOVMidHook{};
+            CutsceneFOVMidHook = safetyhook::create_mid(CutsceneFOVScanResult + 0x5,
+                [](SafetyHookContext& ctx)
+                {
+                    if (fAspectRatio > fNativeAspect)
+                    {
+                        ctx.xmm0.f32[0] = atanf(tanf(ctx.xmm0.f32[0] * (fPi / 360)) / fNativeAspect * fAspectRatio) * (360 / fPi);
+                    }
+                });
+        }
+        else if (!CutsceneFOVScanResult)
+        {
+            spdlog::error("FOV: CutsceneFOV: Pattern scan failed.");
+        }
+    }
+}
+
 void Miscellaneous()
 {
-    // Fix dof
+    // Fix broken depth of field
     uint8_t* DOFFixScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? ?? 0F ?? ?? 0F ?? ?? 56 57 8B ??");
     if (DOFFixScanResult)
     {
@@ -1167,11 +1174,32 @@ void Miscellaneous()
     {
         spdlog::error("DOFFix: Pattern scan failed.");
     }
+
+    if (bUncapFPS)
+    {
+        // Variable FPS cap
+        uint8_t* FPSCapScanResult = Memory::PatternScan(baseModule, "8B ?? ?? 83 ?? 00 74 ?? 48 74 ?? 48 75 ?? F3 0F ?? ?? ?? ?? ?? ?? EB ?? F3 0F ?? ?? ?? ?? ?? ?? EB ?? F3 0F ?? ?? ?? ?? ?? ??") + 0xE;
+        if (FPSCapScanResult)
+        {
+            spdlog::info("FPSCap: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)FPSCapScanResult - (uintptr_t)baseModule);
+            DWORD VariableFPSValue = Memory::GetAbsolute32((uintptr_t)FPSCapScanResult + 0x4);
+            spdlog::info("FPSCap: Value address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)VariableFPSValue - (uintptr_t)baseModule);
+
+            if (VariableFPSValue)
+            {
+                Memory::Write((uintptr_t)VariableFPSValue, (float)1000);
+            }
+        }
+        else if (!FPSCapScanResult)
+        {
+            spdlog::error("FPSCap: Pattern scan failed.");
+        }
+    }
 }
 
 void WindowFocus()
 {
-    if (!bPauseOnFocusLoss)
+    if (bDisablePauseOnFocusLoss)
     {
         int i = 0;
         while (i < 30 && !IsWindow(hWnd))
@@ -1203,13 +1231,16 @@ DWORD __stdcall Main(void*)
     ReadConfig();
     Sleep(iInjectionDelay);
     GetResolution();
-    HUD();
-    MouseInput();
+    if (bFixHUD)
+    {
+        HUD();
+        MouseInput();
+        Markers();
+        Minimap();
+        Map();
+        Movie();
+    }
     FOV();
-    Markers();
-    Minimap();
-    Map();
-    Movie();
     Miscellaneous();
     WindowFocus();
     return true;

@@ -90,6 +90,11 @@ namespace Memory
     {
         return (address + 4 + *reinterpret_cast<std::int32_t*>(address));
     }
+
+    uintptr_t GetAbsolute32(uintptr_t address) noexcept
+    {
+        return (*reinterpret_cast<std::int32_t*>(address));
+    }
 }
 
 namespace Util
