@@ -10,6 +10,8 @@ This is a fix that attempts to fix various issues related to ultrawide display s
 - Fixed cropped cutscene FOV.
 - Spanned backgrounds for various HUD elements like fades etc.
 - Correctly scaled FMVs.
+- Option to uncap 150fps "variable" framerate cap.
+- Borderless windowed mode.
 
 ## Installation
 - Grab the latest release of DDDAFix from [here.](https://github.com/Lyall/DDDAFix/releases)
