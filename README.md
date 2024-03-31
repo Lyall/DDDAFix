@@ -2,10 +2,16 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01UAI9)</br>
 [![Github All Releases](https://img.shields.io/github/downloads/Lyall/DDDAFix/total.svg)](https://github.com/Lyall/DDDAFix/releases)
 
-This is a fix that adds ultrawide support to Dragon's Dogma: Dark Arisen.<br />
+This is a fix that attempts to fix various issues related to ultrawide display support in Dragon's Dogma: Dark Arisen.<br />
 
 ## Features
-- Ultrawide support.
+- Fixed broken depth of field.
+- 16:9 centred HUD.
+- Fixed cropped cutscene FOV.
+- Spanned backgrounds for various HUD elements like fades etc.
+- Correctly scaled FMVs.
+- Option to uncap 150fps "variable" framerate cap.
+- Borderless windowed mode.
 
 ## Installation
 - Grab the latest release of DDDAFix from [here.](https://github.com/Lyall/DDDAFix/releases)
@@ -13,7 +19,7 @@ This is a fix that adds ultrawide support to Dragon's Dogma: Dark Arisen.<br />
 
 ### Steam Deck/Linux Additional Instructions
 🚩**You do not need to do this if you are using Windows!**
-- Open up the game properties in Steam and add `WINEDLLOVERRIDES="input8=n,b" %command%` to the launch options.
+- Open up the game properties in Steam and add `WINEDLLOVERRIDES="dinput8=n,b" %command%` to the launch options.
 
 ## Configuration
 - See **DDDAFix.ini** to adjust settings for the fix.
@@ -24,7 +30,7 @@ This list will contain bugs which may or may not be fixed.
 
 ## Screenshots
 
-| |
+| ![ezgif-3-c3dee62d14](https://github.com/Lyall/DDDAFix/assets/695941/be7804e2-e896-47ac-ab1e-d03e9e00cdcd) |
 |:--:|
 | Gameplay |
 
