@@ -18,7 +18,7 @@ string sConfigFile = "DDDAFix.ini";
 string sExeName;
 filesystem::path sExePath;
 filesystem::path sThisModulePath;
-std::pair DesktopDimensions = { 0,0 };
+RECT rcDesktop;
 
 // Aspect Ratio
 float fPi = (float)3.141592653;
@@ -50,11 +50,14 @@ LPCWSTR sWindowClassName = L"Dragon’s Dogma: Dark Arisen";
 HWND hWnd;
 WNDPROC OldWndProc;
 LRESULT __stdcall NewWndProc(HWND window, UINT message_type, WPARAM w_param, LPARAM l_param) {
-    if (message_type == WM_ACTIVATEAPP && w_param == FALSE) {
-        return 0;
-    }
-    else if (message_type == WM_KILLFOCUS) {
-        return 0;
+    if (bDisablePauseOnFocusLoss)
+    {
+        if (message_type == WM_ACTIVATEAPP && w_param == FALSE) {
+            return 0;
+        }
+        else if (message_type == WM_KILLFOCUS) {
+            return 0;
+        }
     }
     return CallWindowProc(OldWndProc, window, message_type, w_param, l_param);
 };
@@ -1199,28 +1202,40 @@ void Miscellaneous()
 
 void WindowFocus()
 {
-    if (bDisablePauseOnFocusLoss)
+    int i = 0;
+    while (i < 30 && !IsWindow(hWnd))
     {
-        int i = 0;
-        while (i < 30 && !IsWindow(hWnd))
-        {
-            // Wait 1 sec then try again
-            Sleep(1000);
-            i++;
-            hWnd = FindWindowW(sWindowClassName, nullptr);
-        }
+        // Wait 1 sec then try again
+        Sleep(1000);
+        i++;
+        hWnd = FindWindowW(sWindowClassName, nullptr);
+    }
 
-        // If 30 seconds have passed and we still dont have the handle, give up
-        if (i == 30)
+    // If 30 seconds have passed and we still dont have the handle, give up
+    if (i == 30)
+    {
+        spdlog::error("Window Focus: Failed to find window handle.");
+        return;
+    }
+    else
+    {
+        // Set new wnd proc
+        OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)NewWndProc);
+        spdlog::info("Window Focus: Set new WndProc.");
+
+        if (bBorderlessWindowed)
         {
-            spdlog::error("Window Focus: Failed to find window handle.");
-            return;
-        }
-        else
-        {
-            // Set new wnd proc
-            OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)NewWndProc);
-            spdlog::info("Window Focus: Set new WndProc.");
+            LONG lStyle = GetWindowLong(hWnd, GWL_STYLE);
+            LONG lExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
+
+            lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MAXIMIZE | WS_MINIMIZE);
+            lExStyle &= ~(WS_EX_DLGMODALFRAME | WS_EX_COMPOSITED | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_LAYERED | WS_EX_STATICEDGE | WS_EX_TOOLWINDOW | WS_EX_APPWINDOW);
+
+            SetWindowLong(hWnd, GWL_STYLE, lStyle);
+            SetWindowLong(hWnd, GWL_EXSTYLE, lExStyle);
+
+            GetWindowRect(GetDesktopWindow(), &rcDesktop);
+            SetWindowPos(hWnd, HWND_TOP, 0, 0, rcDesktop.right, rcDesktop.bottom, NULL);
         }
     }
 }
