@@ -25,7 +25,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.1
       
     - run: msbuild ${{ github.event.repository.name }}.sln -t:rebuild -verbosity:diag -property:Configuration=Release -property:Platform=x86
-    - run: cp x64\Release\${{ github.event.repository.name }}.asi ${{ github.event.repository.name }}.asi
+    - run: cp Release\${{ github.event.repository.name }}.asi ${{ github.event.repository.name }}.asi
 
     - uses: robinraju/release-downloader@v1.8
       with:
