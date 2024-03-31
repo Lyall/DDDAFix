@@ -5,6 +5,7 @@
 This is a fix that attempts to fix various issues related to ultrawide display support in Dragon's Dogma: Dark Arisen.<br />
 
 ## Features
+- Fixed broken depth of field.
 - 16:9 centred HUD.
 - Fixed cropped cutscene FOV.
 - Spanned backgrounds for various HUD elements like fades etc.
