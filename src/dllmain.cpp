@@ -187,6 +187,7 @@ void GetResolution()
                 spdlog::info("Current Resolution: fHUDHeight: {}", fHUDHeight);
                 spdlog::info("Current Resolution: fHUDWidthOffset: {}", fHUDWidthOffset);
                 spdlog::info("Current Resolution: fHUDHeightOffset: {}", fHUDHeightOffset);
+                spdlog::info("----------");
             });
     }
     else if (!CurrentResolutionScanResult)
@@ -231,10 +232,6 @@ void HUD()
                 if (fAspectRatio > fNativeAspect)
                 {
                     ctx.xmm0.f32[0] = (float)-1 / fAspectMultiplier;
-                }
-                else if (fAspectRatio < fNativeAspect)
-                {
-                    //ctx.xmm1.f32[0] = (float)1 * fAspectMultiplier;
                 }
             });
     }
@@ -1139,8 +1136,30 @@ void Movie()
     }
 }
 
-void FOV()
+void AspectFOV()
 {
+    // Aspect ratio
+    uint8_t* AspectRatioScanResult = Memory::PatternScan(baseModule, "F3 0F ?? ?? ?? ?? ?? 00 8B ?? ?? ?? ?? 00 8B ?? ?? ?? ?? 00 8B ?? ?? ?? ?? 00 8B ?? ?? ?? ?? 00");
+    if (AspectRatioScanResult)
+    {
+        spdlog::info("FOV: AspectRatio: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)AspectRatioScanResult - (uintptr_t)baseModule);
+
+        static SafetyHookMid AspectRatioMidHook{};
+        AspectRatioMidHook = safetyhook::create_mid(AspectRatioScanResult,
+            [](SafetyHookContext& ctx)
+            {
+                // Only needed at <16:9
+                if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm0.f32[0] = (float)iResY / iResX;
+                }
+            });
+    }
+    else if (!AspectRatioScanResult)
+    {
+        spdlog::error("FOV: AspectRatio: Pattern scan failed.");
+    }
+
     if (bFixFOV)
     {
         // Cutscene FOV
@@ -1178,7 +1197,7 @@ void Miscellaneous()
         DOFFixMidHook = safetyhook::create_mid(DOFFixScanResult,
             [](SafetyHookContext& ctx)
             {
-                if (fAspectRatio > fNativeAspect)
+                if (fAspectRatio != fNativeAspect)
                 {
                     ctx.xmm0.f32[0] = (float)720;
                 }
@@ -1280,14 +1299,14 @@ DWORD __stdcall Main(void*)
     GetResolution();
     if (bFixHUD)
     {
-        HUD();
-        MouseInput();
-        Markers();
-        Minimap();
-        Map();
-        Movie();
+        //HUD();
+        //MouseInput();
+        //Markers();
+        //Minimap();
+        //Map();
+        //Movie();
     }
-    FOV();
+    AspectFOV();
     Miscellaneous();
     WindowFocus();
     return true;
