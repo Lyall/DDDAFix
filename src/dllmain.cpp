@@ -259,6 +259,10 @@ void HUD()
                         {
                             ctx.xmm1.f32[0] = (float)720 * fAspectRatio;
                         }
+                        else if (fAspectRatio < fNativeAspect)
+                        {
+                            *reinterpret_cast<float*>(ctx.esi + 0xD4) = (float)1280 / fAspectRatio;
+                        }
                     }
                 }
             });
@@ -276,6 +280,10 @@ void HUD()
                             ctx.xmm0.f32[0] = -fHUDWidthOffset;
                             ctx.xmm1.f32[0] = (float)720 * fAspectRatio;
                         }
+                        else if (fAspectRatio < fNativeAspect)
+                        {
+                            *reinterpret_cast<float*>(ctx.esi + 0xD4) = (float)1280 / fAspectRatio;
+                        }
                     }
                 }
             });
@@ -290,7 +298,11 @@ void HUD()
                     {
                         if (fAspectRatio > fNativeAspect)
                         {
-                            ctx.xmm1.f32[0] *= fAspectMultiplier;
+                            ctx.xmm1.f32[0] = (float)720 * fAspectMultiplier;
+                        }
+                        else if (fAspectRatio < fNativeAspect)
+                        {
+                            *reinterpret_cast<float*>(ctx.edi + 0xD4) = (float)1280 / fAspectRatio;
                         }
                     }
                 }
@@ -332,7 +344,7 @@ void HUD()
         TitleBackgroundMidHook = safetyhook::create_mid(TitleBackgroundScanResult + 0x17,
             [](SafetyHookContext& ctx)
             {
-                if (fAspectRatio > fNativeAspect)
+                if (fAspectRatio != fNativeAspect)
                 {
                     ctx.xmm0.f32[0] = 1.0f;
                 }
@@ -1127,6 +1139,13 @@ void Movie()
                             *reinterpret_cast<float*>(ctx.eax + 0x20) = (float)1 / fAspectMultiplier;
                             *reinterpret_cast<float*>(ctx.eax + 0x30) = (float)1 / fAspectMultiplier;
                         }
+                        else if (fAspectRatio < fNativeAspect)
+                        {
+                            *reinterpret_cast<float*>(ctx.eax + 0x04) = (float)1 * fAspectMultiplier;
+                            *reinterpret_cast<float*>(ctx.eax + 0x14) = (float)-1 * fAspectMultiplier;
+                            *reinterpret_cast<float*>(ctx.eax + 0x24) = (float)1 * fAspectMultiplier;
+                            *reinterpret_cast<float*>(ctx.eax + 0x34) = (float)-1 * fAspectMultiplier;
+                        }
                     }
             });
     }
@@ -1162,6 +1181,26 @@ void AspectFOV()
 
     if (bFixFOV)
     {
+        /*
+        // Gameplay FOV
+        uint8_t* GameplayFOVScanResult = Memory::PatternScan(baseModule, "F3 0F 59 ?? ?? ?? ?? 00 E8 ?? ?? ?? ?? F3 0F 59 ?? ?? ?? ?? ?? 8B ?? ??");
+        if (GameplayFOVScanResult)
+        {
+            spdlog::info("FOV: GameplayFOV: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)GameplayFOVScanResult - (uintptr_t)baseModule);
+
+            static SafetyHookMid GameplayFOVMidHook{};
+            GameplayFOVMidHook = safetyhook::create_mid(GameplayFOVScanResult,
+                [](SafetyHookContext& ctx)
+                {
+                    //
+                });
+        }
+        else if (!GameplayFOVScanResult)
+        {
+            spdlog::error("FOV: GameplayFOV: Pattern scan failed.");
+        }
+        */
+
         // Cutscene FOV
         uint8_t* CutsceneFOVScanResult = Memory::PatternScan(baseModule, "76 ?? 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? F3 0F ?? ?? ?? 8B ?? ?? ?? 83 ?? ??");
         if (CutsceneFOVScanResult)
@@ -1299,12 +1338,12 @@ DWORD __stdcall Main(void*)
     GetResolution();
     if (bFixHUD)
     {
-        //HUD();
-        //MouseInput();
-        //Markers();
-        //Minimap();
-        //Map();
-        //Movie();
+        HUD();
+        MouseInput();
+        Markers();
+        Minimap();
+        Map();
+        Movie();
     }
     AspectFOV();
     Miscellaneous();
