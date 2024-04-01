@@ -5,13 +5,17 @@
 This is a fix for Dragon's Dogma: Dark Arisen that attempts to solve various issues related to ultrawide display support and more.<br />
 
 ## Features
+- Option to uncap 150fps "variable" framerate cap.
+- Borderless windowed mode.
+
+## Ultrawide Features
 - Fixed broken depth of field.
 - 16:9 centred HUD.
+- Fixed many broken/misaligned HUD elements.
+- Corrected mouse input for interacting with UI.
 - Fixed cropped cutscene FOV.
 - Spanned backgrounds for various HUD elements like fades etc.
 - Correctly scaled FMVs.
-- Option to uncap 150fps "variable" framerate cap.
-- Borderless windowed mode.
 
 ## Installation
 - Grab the latest release of DDDAFix from [here.](https://github.com/Lyall/DDDAFix/releases)
