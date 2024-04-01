@@ -17,6 +17,7 @@ This is a fix for Dragon's Dogma: Dark Arisen that attempts to solve various iss
 ## Other Features
 - Option to uncap 150fps "variable" framerate cap.
 - Borderless windowed mode.
+- Option to disable pausing when game is alt+tabbed.
 
 ## Installation
 - Grab the latest release of DDDAFix from [here.](https://github.com/Lyall/DDDAFix/releases)
@@ -32,6 +33,7 @@ This is a fix for Dragon's Dogma: Dark Arisen that attempts to solve various iss
 ## Known Issues
 Please report any issues you see.
 This list will contain bugs which may or may not be fixed.
+- Mouse position is temporarily offset after interacting with the map.
 
 ## Screenshots
 
