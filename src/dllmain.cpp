@@ -131,7 +131,7 @@ void ReadConfig()
     // Read ini file
     inipp::get_value(ini.sections["DDDAFix Parameters"], "InjectionDelay", iInjectionDelay);
     inipp::get_value(ini.sections["Raise Framerate Cap"], "Enabled", bUncapFPS);
-    inipp::get_value(ini.sections["DisablePause on Focus Loss"], "Enabled", bDisablePauseOnFocusLoss);
+    inipp::get_value(ini.sections["Disable Pause on Focus Loss"], "Enabled", bDisablePauseOnFocusLoss);
     inipp::get_value(ini.sections["Borderless Windowed Mode"], "Enabled", bBorderlessWindowed);
     inipp::get_value(ini.sections["Fix HUD"], "Enabled", bFixHUD);
     inipp::get_value(ini.sections["Fix FOV"], "Enabled", bFixFOV);
