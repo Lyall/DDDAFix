@@ -45,6 +45,7 @@ int iResX = 1920;
 int iResY = 1080;
 float fDefMinimapMulti = 0.0007812500116f;
 int iOrigMinimapWidthOffset = 0;
+int iOrigMinimapHeightOffset = 0;
 int iFullscreenMode;
 LPCWSTR sWindowClassName = L"Dragon’s Dogma: Dark Arisen";
 
@@ -747,7 +748,7 @@ void Minimap()
         MinimapIconHeightOffsetMidHook = safetyhook::create_mid(MinimapIconHeightOffsetScanResult,
             [](SafetyHookContext& ctx)
             {
-                if (fAspectRatio > fNativeAspect)
+                if (fAspectRatio != fNativeAspect)
                 {
                     if (ctx.esi + 0x500)
                     {
@@ -794,8 +795,9 @@ void Minimap()
         spdlog::info("Minimap: MinimapWidthOffset: 3: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MinimapWidthOffset3ScanResult - (uintptr_t)baseModule);
         spdlog::info("Minimap: MinimapWidthOffset: 4: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MinimapWidthOffset4ScanResult - (uintptr_t)baseModule);
 
+        // Minimap quest marker
         static SafetyHookMid MinimapWidthOffset1MidHook{};
-        MinimapWidthOffset1MidHook = safetyhook::create_mid(MinimapWidthOffset1ScanResult,
+        MinimapWidthOffset1MidHook = safetyhook::create_mid(MinimapWidthOffset1ScanResult - 0x8,
             [](SafetyHookContext& ctx)
             {
                 if (fAspectRatio > fNativeAspect)
@@ -806,21 +808,40 @@ void Minimap()
                         *reinterpret_cast<int*>(ctx.edi + 0x468) = (int)floorf(iOrigMinimapWidthOffset / fAspectMultiplier);
                     }
                 }
+                else if (fAspectRatio < fNativeAspect)
+                {
+                    iOrigMinimapHeightOffset = ((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2;
+                    if (ctx.edi + 0x46C)
+                    {
+                        *reinterpret_cast<int*>(ctx.edi + 0x46C) = (int)floorf(iOrigMinimapHeightOffset - ((iResY - fHUDHeight) / 2));
+                    }
+                }
             });
         
+        // Minimap ring
         static SafetyHookMid MinimapWidthOffset2MidHook{};
         MinimapWidthOffset2MidHook = safetyhook::create_mid(MinimapWidthOffset2ScanResult,
             [](SafetyHookContext& ctx)
             {
                 if (fAspectRatio > fNativeAspect)
                 {
+                    iOrigMinimapWidthOffset = (((iResX * fDefMinimapMulti) * 256) / 2) + ((iResX * fDefMinimapMulti) * 40);
                     if (ctx.eax + 0x468)
                     {
                         *reinterpret_cast<int*>(ctx.eax + 0x468) = (int)floorf((iOrigMinimapWidthOffset / fAspectMultiplier) + fHUDWidthOffset);
                     }
                 }
+                else if (fAspectRatio < fNativeAspect)
+                {
+                    iOrigMinimapHeightOffset = ((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2;
+                    if (ctx.eax + 0x46C)
+                    {
+                        *reinterpret_cast<int*>(ctx.eax + 0x46C) = (int)floorf(iOrigMinimapHeightOffset);
+                    }
+                }
             });
 
+        // Minimap pawn marker
         static SafetyHookMid MinimapWidthOffset3MidHook{};
         MinimapWidthOffset3MidHook = safetyhook::create_mid(MinimapWidthOffset3ScanResult,
             [](SafetyHookContext& ctx)
@@ -833,8 +854,17 @@ void Minimap()
                         *reinterpret_cast<int*>(ctx.edi + 0x468) = (int)floorf(iOrigMinimapWidthOffset / fAspectMultiplier);
                     }
                 }
+                else if (fAspectRatio < fNativeAspect)
+                {
+                    iOrigMinimapHeightOffset = ((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2;
+                    if (ctx.edi + 0x46C)
+                    {
+                        *reinterpret_cast<int*>(ctx.edi + 0x46C) = (int)floorf(iOrigMinimapHeightOffset - ((iResY - fHUDHeight) / 2));
+                    }
+                }
             });  
 
+        // Minimap player marker
         static SafetyHookMid MinimapWidthOffset4MidHook{};
         MinimapWidthOffset4MidHook = safetyhook::create_mid(MinimapWidthOffset4ScanResult,
             [](SafetyHookContext& ctx)
@@ -845,6 +875,14 @@ void Minimap()
                     if (ctx.edi + 0x468)
                     {
                         *reinterpret_cast<int*>(ctx.edi + 0x468) = (int)floorf(iOrigMinimapWidthOffset / fAspectMultiplier);
+                    }
+                }
+                else if (fAspectRatio < fNativeAspect)
+                {
+                    iOrigMinimapHeightOffset = ((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2;
+                    if (ctx.edi + 0x46C)
+                    {
+                        *reinterpret_cast<int*>(ctx.edi + 0x46C) = (int)floorf(iOrigMinimapHeightOffset - ((iResY - fHUDHeight) / 2));
                     }
                 }
             });
@@ -1375,7 +1413,7 @@ DWORD __stdcall Main(void*)
         MouseInput();
         Markers();
         Minimap();
-        Map();
+        //Map();
         Movie();
     }
     AspectFOV();
