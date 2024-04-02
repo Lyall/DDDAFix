@@ -288,8 +288,8 @@ void HUD()
                 }
             });
 
-        static SafetyHookMid HUDBackgrounds2MidHook{};
-        HUDBackgrounds2MidHook = safetyhook::create_mid(HUDBackgrounds2ScanResult + 0x8,
+        static SafetyHookMid HUDBackgrounds2MidHook1{};
+        HUDBackgrounds2MidHook1 = safetyhook::create_mid(HUDBackgrounds2ScanResult + 0x8,
             [](SafetyHookContext& ctx)
             {
                 if (ctx.edi + 0xD0)
@@ -298,7 +298,7 @@ void HUD()
                     {
                         if (fAspectRatio > fNativeAspect)
                         {
-                            ctx.xmm1.f32[0] = (float)720 * fAspectMultiplier;
+                            ctx.xmm1.f32[0] = (float)720 * fAspectRatio;
                         }
                         else if (fAspectRatio < fNativeAspect)
                         {
@@ -307,6 +307,30 @@ void HUD()
                     }
                 }
             });
+
+        // This one spans certain menu backgrounds but it also spans the capcom logo and maybe more?
+        /*
+        static SafetyHookMid HUDBackgrounds2MidHook2{};
+        HUDBackgrounds2MidHook2 = safetyhook::create_mid(HUDBackgrounds2ScanResult + 0x1F,
+            [](SafetyHookContext& ctx)
+            {
+                if (ctx.edi + 0xD0)
+                {
+                    if ((ctx.xmm1.f32[0] == (float)1280 && *reinterpret_cast<float*>(ctx.edi + 0xD4) == (float)720))
+                    {
+                        if (fAspectRatio > fNativeAspect)
+                        {
+                            ctx.xmm0.f32[0] = -fHUDWidthOffset;
+                            ctx.xmm1.f32[0] = (float)720 * fAspectRatio;
+                        }
+                        else if (fAspectRatio < fNativeAspect)
+                        {
+                            *reinterpret_cast<float*>(ctx.edi + 0xD4) = (float)1280 / fAspectRatio;
+                        }
+                    }
+                }
+            });
+        */
     }
     else if (!HUDBackgrounds1ScanResult || !HUDBackgrounds2ScanResult)
     {
@@ -1302,16 +1326,11 @@ void WindowFocus()
                     {
                         iFullscreenMode = *reinterpret_cast<BYTE*>(ctx.edi + 0x23);
 
-                        if (bBorderlessWindowed && iFullscreenMode == 0)
+                        LONG lStyle = GetWindowLong(hWnd, GWL_STYLE);
+                        if (bBorderlessWindowed && iFullscreenMode == 0 && (lStyle & WS_POPUP) != WS_POPUP)
                         {
-                            LONG lStyle = GetWindowLong(hWnd, GWL_STYLE);
-                            LONG lExStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
-
-                            lStyle &= ~(WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MAXIMIZE | WS_MINIMIZE);
-                            lExStyle &= ~(WS_EX_DLGMODALFRAME | WS_EX_COMPOSITED | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_LAYERED | WS_EX_STATICEDGE | WS_EX_TOOLWINDOW | WS_EX_APPWINDOW);
-
+                            lStyle &= ~(WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
                             SetWindowLong(hWnd, GWL_STYLE, lStyle);
-                            SetWindowLong(hWnd, GWL_EXSTYLE, lExStyle);
 
                             GetWindowRect(GetDesktopWindow(), &rcDesktop);
                             SetWindowPos(hWnd, HWND_TOP, 0, 0, rcDesktop.right, rcDesktop.bottom, NULL);
@@ -1323,7 +1342,6 @@ void WindowFocus()
         {
             spdlog::error("WindowMode: Pattern scan failed.");
         }
-
         // Set new wnd proc
         OldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC, (LONG_PTR)NewWndProc);
         spdlog::info("Window Focus: Set new WndProc.");
