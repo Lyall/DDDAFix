@@ -12,7 +12,7 @@ HMODULE thisModule;
 inipp::Ini<char> ini;
 std::shared_ptr<spdlog::logger> logger;
 string sFixName = "DDDAFix";
-string sFixVer = "0.8.0";
+string sFixVer = "0.8.1";
 string sLogFile = "DDDAFix.log";
 string sConfigFile = "DDDAFix.ini";
 string sExeName;
