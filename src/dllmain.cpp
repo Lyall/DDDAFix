@@ -583,14 +583,25 @@ void Markers()
     {
         spdlog::info("Markers: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MarkersScanResult - (uintptr_t)baseModule);
         
-        static SafetyHookMid MarkersMidHook{};
-        MarkersMidHook = safetyhook::create_mid(MarkersScanResult,
+        static SafetyHookMid MarkersWidthMidHook{};
+        MarkersWidthMidHook = safetyhook::create_mid(MarkersScanResult,
             [](SafetyHookContext& ctx)
             {
                 if (fAspectRatio > fNativeAspect)
                 {
                     ctx.xmm0.f32[0] /= (float)1280;
                     ctx.xmm0.f32[0] *= (float)720 * fAspectRatio;
+                }
+            });
+
+        static SafetyHookMid MarkersHeightMidHook{};
+        MarkersHeightMidHook = safetyhook::create_mid(MarkersScanResult + 0x28,
+            [](SafetyHookContext& ctx)
+            {
+                if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm1.f32[0] /= (float)720;
+                    ctx.xmm1.f32[0] *= (float)1280 / fAspectRatio;
                 }
             });
 
@@ -601,6 +612,10 @@ void Markers()
                 if (fAspectRatio > fNativeAspect)
                 {
                     ctx.xmm0.f32[0] -= (float)((720 * fAspectRatio) - 1280) / 2;
+                }
+                else if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm1.f32[0] -= (float)((1280 / fAspectRatio) - 720) / 2;
                 }
             });   
     }
