@@ -802,7 +802,7 @@ void Minimap()
             {
                 if (fAspectRatio > fNativeAspect)
                 {
-                    iOrigMinimapWidthOffset = (((iResX * fDefMinimapMulti) * 256) / 2) + ((iResX * fDefMinimapMulti) * 40);
+                    iOrigMinimapWidthOffset = (int)floorf((((iResX * fDefMinimapMulti) * 256) / 2) + ((iResX * fDefMinimapMulti) * 40));
                     if (ctx.edi + 0x468)
                     {
                         *reinterpret_cast<int*>(ctx.edi + 0x468) = (int)floorf(iOrigMinimapWidthOffset / fAspectMultiplier);
@@ -810,7 +810,7 @@ void Minimap()
                 }
                 else if (fAspectRatio < fNativeAspect)
                 {
-                    iOrigMinimapHeightOffset = ((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2;
+                    iOrigMinimapHeightOffset = (int)floorf(((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2);
                     if (ctx.edi + 0x46C)
                     {
                         *reinterpret_cast<int*>(ctx.edi + 0x46C) = (int)floorf(iOrigMinimapHeightOffset - ((iResY - fHUDHeight) / 2));
@@ -825,7 +825,7 @@ void Minimap()
             {
                 if (fAspectRatio > fNativeAspect)
                 {
-                    iOrigMinimapWidthOffset = (((iResX * fDefMinimapMulti) * 256) / 2) + ((iResX * fDefMinimapMulti) * 40);
+                    iOrigMinimapWidthOffset = (int)floorf((((iResX * fDefMinimapMulti) * 256) / 2) + ((iResX * fDefMinimapMulti) * 40));
                     if (ctx.eax + 0x468)
                     {
                         *reinterpret_cast<int*>(ctx.eax + 0x468) = (int)floorf((iOrigMinimapWidthOffset / fAspectMultiplier) + fHUDWidthOffset);
@@ -833,10 +833,10 @@ void Minimap()
                 }
                 else if (fAspectRatio < fNativeAspect)
                 {
-                    iOrigMinimapHeightOffset = ((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2;
+                    iOrigMinimapHeightOffset = (int)floorf(((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2);
                     if (ctx.eax + 0x46C)
                     {
-                        *reinterpret_cast<int*>(ctx.eax + 0x46C) = (int)floorf(iOrigMinimapHeightOffset);
+                        *reinterpret_cast<int*>(ctx.eax + 0x46C) = iOrigMinimapHeightOffset;
                     }
                 }
             });
@@ -848,7 +848,7 @@ void Minimap()
             {
                 if (fAspectRatio > fNativeAspect)
                 {
-                    iOrigMinimapWidthOffset = (((iResX * fDefMinimapMulti) * 256) / 2) + ((iResX * fDefMinimapMulti) * 40);
+                    iOrigMinimapWidthOffset = (int)floorf((((iResX * fDefMinimapMulti) * 256) / 2) + ((iResX * fDefMinimapMulti) * 40));
                     if (ctx.edi + 0x468)
                     {
                         *reinterpret_cast<int*>(ctx.edi + 0x468) = (int)floorf(iOrigMinimapWidthOffset / fAspectMultiplier);
@@ -856,7 +856,7 @@ void Minimap()
                 }
                 else if (fAspectRatio < fNativeAspect)
                 {
-                    iOrigMinimapHeightOffset = ((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2;
+                    iOrigMinimapHeightOffset = (int)floorf(((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2);
                     if (ctx.edi + 0x46C)
                     {
                         *reinterpret_cast<int*>(ctx.edi + 0x46C) = (int)floorf(iOrigMinimapHeightOffset - ((iResY - fHUDHeight) / 2));
@@ -871,7 +871,7 @@ void Minimap()
             {
                 if (fAspectRatio > fNativeAspect)
                 {
-                    iOrigMinimapWidthOffset = (((iResX * fDefMinimapMulti) * 256) / 2) + ((iResX * fDefMinimapMulti) * 40);
+                    iOrigMinimapWidthOffset = (int)floorf((((iResX * fDefMinimapMulti) * 256) / 2) + ((iResX * fDefMinimapMulti) * 40));
                     if (ctx.edi + 0x468)
                     {
                         *reinterpret_cast<int*>(ctx.edi + 0x468) = (int)floorf(iOrigMinimapWidthOffset / fAspectMultiplier);
@@ -879,7 +879,7 @@ void Minimap()
                 }
                 else if (fAspectRatio < fNativeAspect)
                 {
-                    iOrigMinimapHeightOffset = ((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2;
+                    iOrigMinimapHeightOffset = (int)floorf(((iResX / (float)1280) * 454) + (((iResX * fDefMinimapMulti) * 256) / 2) + (iResY - fHUDHeight) / 2);
                     if (ctx.edi + 0x46C)
                     {
                         *reinterpret_cast<int*>(ctx.edi + 0x46C) = (int)floorf(iOrigMinimapHeightOffset - ((iResY - fHUDHeight) / 2));
@@ -940,13 +940,13 @@ void Map()
     }
 
     // Map position hor offset
-    uint8_t* MapPosOffsetScanResult = Memory::PatternScan(baseModule, "E9 ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? 00 33 ?? BE ?? ?? ?? 00") + 0x5;
-    if (MapPosOffsetScanResult)
+    uint8_t* MapPosOffsetHorScanResult = Memory::PatternScan(baseModule, "E9 ?? ?? ?? ?? F3 0F ?? ?? ?? ?? ?? 00 33 ?? BE ?? ?? ?? 00") + 0x5;
+    if (MapPosOffsetHorScanResult)
     {
-        spdlog::info("Map: MapPosOffset: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapPosOffsetScanResult - (uintptr_t)baseModule);
+        spdlog::info("Map: MapPosOffset: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapPosOffsetHorScanResult - (uintptr_t)baseModule);
 
-        static SafetyHookMid MapPosOffsetMidHook{};
-        MapPosOffsetMidHook = safetyhook::create_mid(MapPosOffsetScanResult,
+        static SafetyHookMid MapPosOffsetHorMidHook{};
+        MapPosOffsetHorMidHook = safetyhook::create_mid(MapPosOffsetHorScanResult,
             [](SafetyHookContext& ctx)
             {
                 if (fAspectRatio > fNativeAspect)
@@ -955,7 +955,7 @@ void Map()
                 }
             });
     }
-    else if (!MapPosOffsetScanResult)
+    else if (!MapPosOffsetHorScanResult)
     {
         spdlog::error("Map: MapPosOffset: Pattern scan failed.");
     }
@@ -1003,8 +1003,8 @@ void Map()
         spdlog::info("Map: MapCursorOffset: 2: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapCursorOffset2ScanResult - (uintptr_t)baseModule);
         spdlog::info("Map: MapCursorOffset: 3: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapCursorOffset3ScanResult - (uintptr_t)baseModule);
 
-        static SafetyHookMid MapCursorOffset1MidHook{};
-        MapCursorOffset1MidHook = safetyhook::create_mid(MapCursorOffset1ScanResult,
+        static SafetyHookMid MapCursorOffset1MidHook1{};
+        MapCursorOffset1MidHook1 = safetyhook::create_mid(MapCursorOffset1ScanResult,
             [](SafetyHookContext& ctx)
             {
                 if (fAspectRatio > fNativeAspect)
@@ -1013,8 +1013,18 @@ void Map()
                 }
             });
 
-        static SafetyHookMid MapCursorOffset2MidHook{};
-        MapCursorOffset2MidHook = safetyhook::create_mid(MapCursorOffset2ScanResult,
+        static SafetyHookMid MapCursorOffset1MidHook2{};
+        MapCursorOffset1MidHook2 = safetyhook::create_mid(MapCursorOffset1ScanResult + 0x19,
+            [](SafetyHookContext& ctx)
+            {
+                if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm0.f32[0] -= fHUDHeightOffset;
+                }
+            });
+
+        static SafetyHookMid MapCursorOffset2MidHook1{};
+        MapCursorOffset2MidHook1 = safetyhook::create_mid(MapCursorOffset2ScanResult,
             [](SafetyHookContext& ctx)
             {
                 if (fAspectRatio > fNativeAspect)
@@ -1023,13 +1033,33 @@ void Map()
                 }
             });
 
-        static SafetyHookMid MapCursorOffset3MidHook{};
-        MapCursorOffset3MidHook = safetyhook::create_mid(MapCursorOffset3ScanResult,
+        static SafetyHookMid MapCursorOffset2MidHook2{};
+        MapCursorOffset2MidHook2 = safetyhook::create_mid(MapCursorOffset2ScanResult - 0x13,
+            [](SafetyHookContext& ctx)
+            {
+                if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm1.f32[0] -= fHUDHeightOffset;
+                }
+            });
+
+        static SafetyHookMid MapCursorOffset3MidHook1{};
+        MapCursorOffset3MidHook1 = safetyhook::create_mid(MapCursorOffset3ScanResult,
             [](SafetyHookContext& ctx)
             {
                 if (fAspectRatio > fNativeAspect)
                 {
                     ctx.xmm3.f32[0] -= fHUDWidthOffset;
+                }
+            });
+
+        static SafetyHookMid MapCursorOffset3MidHook2{};
+        MapCursorOffset3MidHook2 = safetyhook::create_mid(MapCursorOffset3ScanResult + 0x42,
+            [](SafetyHookContext& ctx)
+            {
+                if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm0.f32[0] -= fHUDHeightOffset;
                 }
             });
     }
@@ -1048,6 +1078,7 @@ void Map()
     {
         spdlog::info("Map: MapIconWidthOffset: 1: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapIconWidthOffset1ScanResult - (uintptr_t)baseModule);
         spdlog::info("Map: MapIconWidthOffset: 2: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapIconWidthOffset2ScanResult - (uintptr_t)baseModule);
+        spdlog::info("Map: MapIconWidthOffset: 3: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapIconWidthOffset3ScanResult - (uintptr_t)baseModule);
         spdlog::info("Map: MapIconWidthOffset: 4: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapIconWidthOffset4ScanResult - (uintptr_t)baseModule);
         spdlog::info("Map: MapIconWidthOffset: 5: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapIconWidthOffset5ScanResult - (uintptr_t)baseModule);
 
@@ -1061,6 +1092,16 @@ void Map()
                 }
             });
 
+        static SafetyHookMid MapIconHeightOffset1MidHook{};
+        MapIconHeightOffset1MidHook = safetyhook::create_mid(MapIconWidthOffset1ScanResult + 0x34,
+            [](SafetyHookContext& ctx)
+            {
+                if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm0.f32[0] -= (float)((1280 / fAspectRatio) - 720) / 2;
+                }
+            });
+
         static SafetyHookMid MapIconWidthOffset2MidHook{};
         MapIconWidthOffset2MidHook = safetyhook::create_mid(MapIconWidthOffset2ScanResult,
             [](SafetyHookContext& ctx)
@@ -1068,6 +1109,16 @@ void Map()
                 if (fAspectRatio > fNativeAspect)
                 {
                     ctx.xmm2.f32[0] -= (float)((720 * fAspectRatio) - 1280) / 2;
+                }
+            });
+
+        static SafetyHookMid MapIconHeightOffset2MidHook{};
+        MapIconHeightOffset2MidHook = safetyhook::create_mid(MapIconWidthOffset2ScanResult + 0x1F,
+            [](SafetyHookContext& ctx)
+            {
+                if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm0.f32[0] -= (float)((1280 / fAspectRatio) - 720) / 2;
                 }
             });
 
@@ -1081,6 +1132,16 @@ void Map()
                 }
             });
 
+        static SafetyHookMid MapIconHeightOffset3MidHook{};
+        MapIconHeightOffset3MidHook = safetyhook::create_mid(MapIconWidthOffset3ScanResult + 0x22,
+            [](SafetyHookContext& ctx)
+            {
+                if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm0.f32[0] -= (float)((1280 / fAspectRatio) - 720) / 2;
+                }
+            });
+
         static SafetyHookMid MapIconWidthOffset4MidHook{};
         MapIconWidthOffset4MidHook = safetyhook::create_mid(MapIconWidthOffset4ScanResult,
             [](SafetyHookContext& ctx)
@@ -1091,6 +1152,17 @@ void Map()
                 }
             });
 
+
+        static SafetyHookMid MapIconHeightOffset4MidHook{};
+        MapIconHeightOffset4MidHook = safetyhook::create_mid(MapIconWidthOffset4ScanResult + 0x1B,
+            [](SafetyHookContext& ctx)
+            {
+                if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm0.f32[0] -= (float)((1280 / fAspectRatio) - 720) / 2;
+                }
+            });
+
         static SafetyHookMid MapIconWidthOffset5MidHook{};
         MapIconWidthOffset5MidHook = safetyhook::create_mid(MapIconWidthOffset5ScanResult,
             [](SafetyHookContext& ctx)
@@ -1098,6 +1170,16 @@ void Map()
                 if (fAspectRatio > fNativeAspect)
                 {
                     ctx.xmm1.f32[0] -= (float)((720 * fAspectRatio) - 1280) / 2;
+                }
+            });
+
+        static SafetyHookMid MapIconHeightOffset5MidHook{};
+        MapIconHeightOffset5MidHook = safetyhook::create_mid(MapIconWidthOffset5ScanResult + 0x21,
+            [](SafetyHookContext& ctx)
+            {
+                if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm0.f32[0] -= (float)((1280 / fAspectRatio) - 720) / 2;
                 }
             });
     }
@@ -1186,13 +1268,21 @@ void Map()
                         *reinterpret_cast<int*>(ctx.eax + 0xB4) = (int)fHUDWidth;
                     }
                 }
+                else if (fAspectRatio < fNativeAspect)
+                {
+                    if (ctx.eax + 0xB4)
+                    {
+                        // Insert iResX into empty space
+                        *reinterpret_cast<int*>(ctx.eax + 0xB4) = iResX;
+                    }
+                }
             });
     }
     else if (!MapArea1ScanResult || !MapArea2ScanResult || !MapArea3ScanResult || !MapArea4ScanResult || !MapArea5ScanResult)
     {
         spdlog::error("Map: MapArea: Pattern scan failed.");
     }
-
+   
 }
 
 void Movie()
@@ -1413,7 +1503,7 @@ DWORD __stdcall Main(void*)
         MouseInput();
         Markers();
         Minimap();
-        //Map();
+        Map();
         Movie();
     }
     AspectFOV();
