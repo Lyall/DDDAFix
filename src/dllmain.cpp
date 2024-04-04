@@ -448,7 +448,7 @@ void MouseInput()
                 }
             });
     }
-    else if (!MousePosScanResult)
+    else if (!MousePosScanResult || !MapMousePos1ScanResult || !MapMousePos2ScanResult || !MapMousePos3ScanResult || !MapMousePos4ScanResult)
     {
         spdlog::error("MouseInput: MousePos: Pattern scan failed.");
     }
@@ -1316,7 +1316,7 @@ void Map()
                         *reinterpret_cast<int*>(ctx.eax + 0xB4) = (int)fHUDWidth;
                     }
                 }
-                else if (fAspectRatio < fNativeAspect)
+                else if (fAspectRatio <= fNativeAspect)
                 {
                     if (ctx.eax + 0xB4)
                     {
