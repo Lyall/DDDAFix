@@ -2,10 +2,9 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01UAI9)</br>
 [![Github All Releases](https://img.shields.io/github/downloads/Lyall/DDDAFix/total.svg)](https://github.com/Lyall/DDDAFix/releases)
 
-This is a fix for Dragon's Dogma: Dark Arisen that attempts to solve various issues related to ultrawide display support and more.<br />
+This is a fix for Dragon's Dogma: Dark Arisen that attempts to solve various issues related to non-16:9 display support and more.<br />
 
-
-## Ultrawide Features
+## Ultrawide/Narrower Features
 - Fixed broken depth of field.
 - 16:9 centred HUD.
 - Fixed many broken/misaligned HUD elements.
