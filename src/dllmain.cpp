@@ -12,7 +12,7 @@ HMODULE thisModule;
 inipp::Ini<char> ini;
 std::shared_ptr<spdlog::logger> logger;
 string sFixName = "DDDAFix";
-string sFixVer = "1.0.0";
+string sFixVer = "0.9.0";
 string sLogFile = "DDDAFix.log";
 string sConfigFile = "DDDAFix.ini";
 string sExeName;
@@ -387,14 +387,12 @@ void MouseInput()
     // Reported mouse position
     uint8_t* MousePosScanResult = Memory::PatternScan(baseModule, "99 F7 ?? 8B ?? ?? ?? 89 ?? 8B ?? ?? ?? 2B ?? 0F ?? ?? ?? ?? 99 F7 ??") + 0x7;
     uint8_t* MapMousePos1ScanResult = Memory::PatternScan(baseModule, "89 ?? 8B ?? ?? 5E 5D 89 ?? ?? 5B 83 ?? ?? C2 08 00");
-    uint8_t* MapMousePos2ScanResult = Memory::PatternScan(baseModule, "F3 0F 11 ?? ?? ?? 0F 57 ?? F3 0F ?? ?? ?? F3 0F 11 ?? ?? ?? F3 0F 11 ?? ?? ?? F3 0F 11 ?? ?? ??  0F 84 89 ?? ?? ??"); // Bad pattern
     uint8_t* MapMousePos3ScanResult = Memory::PatternScan(baseModule, "89 ?? ?? ?? 8D ?? ?? ?? 8B ?? 89 ?? ?? ?? E8 ?? ?? ?? ?? A1 ?? ?? ?? ??");
     uint8_t* MapMousePos4ScanResult = Memory::PatternScan(baseModule, "89 ?? ?? ?? 8D ?? ?? ?? 8B ?? 89 ?? ?? ?? E8 ?? ?? ?? ?? 8B ?? ?? ?? 8B ?? ?? ?? ?? ?? 8B ?? 8B ?? ??");
-    if (MousePosScanResult && MapMousePos1ScanResult && MapMousePos2ScanResult && MapMousePos3ScanResult && MapMousePos4ScanResult)
+    if (MousePosScanResult && MapMousePos1ScanResult && MapMousePos3ScanResult && MapMousePos4ScanResult)
     {
         spdlog::info("MouseInput: MousePos: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MousePosScanResult - (uintptr_t)baseModule);
         spdlog::info("MouseInput: MapMousePos: 1: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapMousePos1ScanResult - (uintptr_t)baseModule);
-        spdlog::info("MouseInput: MapMousePos: 2: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapMousePos2ScanResult - (uintptr_t)baseModule);
         spdlog::info("MouseInput: MapMousePos: 3: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapMousePos3ScanResult - (uintptr_t)baseModule);
         spdlog::info("MouseInput: MapMousePos: 4: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)MapMousePos4ScanResult - (uintptr_t)baseModule);
 
@@ -418,16 +416,6 @@ void MouseInput()
                 }
             });
 
-        static SafetyHookMid MapMousePos2MidHook{};
-        MapMousePos2MidHook = safetyhook::create_mid(MapMousePos2ScanResult,
-            [](SafetyHookContext& ctx)
-            {
-                if (fAspectRatio > fNativeAspect)
-                {
-                    ctx.xmm1.f32[0] += fHUDWidthOffset;
-                }
-            });
-
         static SafetyHookMid MapMousePos3MidHook{};
         MapMousePos3MidHook = safetyhook::create_mid(MapMousePos3ScanResult,
             [](SafetyHookContext& ctx)
@@ -448,7 +436,7 @@ void MouseInput()
                 }
             });
     }
-    else if (!MousePosScanResult || !MapMousePos1ScanResult || !MapMousePos2ScanResult || !MapMousePos3ScanResult || !MapMousePos4ScanResult)
+    else if (!MousePosScanResult || !MapMousePos1ScanResult || !MapMousePos3ScanResult || !MapMousePos4ScanResult)
     {
         spdlog::error("MouseInput: MousePos: Pattern scan failed.");
     }
