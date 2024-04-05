@@ -12,7 +12,7 @@ HMODULE thisModule;
 inipp::Ini<char> ini;
 std::shared_ptr<spdlog::logger> logger;
 string sFixName = "DDDAFix";
-string sFixVer = "0.8.1";
+string sFixVer = "1.0.0";
 string sLogFile = "DDDAFix.log";
 string sConfigFile = "DDDAFix.ini";
 string sExeName;
@@ -1413,26 +1413,46 @@ void AspectFOV()
         uint8_t* GameplayFOVScanResult = Memory::PatternScan(baseModule, "F3 0F 59 ?? ?? ?? ?? 00 E8 ?? ?? ?? ?? F3 0F 59 ?? ?? ?? ?? ?? 8B ?? ??");
         if (GameplayFOVScanResult)
         {
-            spdlog::info("FOV: GameplayFOV: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)GameplayFOVScanResult - (uintptr_t)baseModule);
+            spdlog::info("AspectFOV: GameplayFOV: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)GameplayFOVScanResult - (uintptr_t)baseModule);
 
             static SafetyHookMid GameplayFOVMidHook{};
             GameplayFOVMidHook = safetyhook::create_mid(GameplayFOVScanResult,
                 [](SafetyHookContext& ctx)
                 {
-                    //
                 });
         }
         else if (!GameplayFOVScanResult)
         {
-            spdlog::error("FOV: GameplayFOV: Pattern scan failed.");
+            spdlog::error("AspectFOV: GameplayFOV: Pattern scan failed.");
         }
         */
+
+        // Loading screen aspect ratio
+        uint8_t* LoadingAspectScanResult = Memory::PatternScan(baseModule, "F3 0F 11 ?? ?? ?? EB ?? 8B ?? ?? 0F ?? ?? C1 ?? 10 89 ?? ?? ??");
+        if (LoadingAspectScanResult)
+        {
+            spdlog::info("AspectFOV: LoadingAspect: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)LoadingAspectScanResult - (uintptr_t)baseModule);
+
+            static SafetyHookMid LoadingAspectMidHook{};
+            LoadingAspectMidHook = safetyhook::create_mid(LoadingAspectScanResult,
+                [](SafetyHookContext& ctx)
+                {
+                    if (fAspectRatio < fNativeAspect)
+                    {
+                        ctx.xmm0.f32[0] = fNativeAspect;
+                    }
+                });
+        }
+        else if (!LoadingAspectScanResult)
+        {
+            spdlog::error("AspectFOV: LoadingAspect: Pattern scan failed.");
+        }
 
         // Cutscene FOV
         uint8_t* CutsceneFOVScanResult = Memory::PatternScan(baseModule, "76 ?? 0F ?? ?? F3 0F ?? ?? ?? ?? ?? ?? F3 0F ?? ?? ?? 8B ?? ?? ?? 83 ?? ??");
         if (CutsceneFOVScanResult)
         {
-            spdlog::info("FOV: CutsceneFOV: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)CutsceneFOVScanResult - (uintptr_t)baseModule);
+            spdlog::info("AspectFOV: CutsceneFOV: Address is {:s}+{:x}", sExeName.c_str(), (uintptr_t)CutsceneFOVScanResult - (uintptr_t)baseModule);
 
             static SafetyHookMid CutsceneFOVMidHook{};
             CutsceneFOVMidHook = safetyhook::create_mid(CutsceneFOVScanResult + 0x5,
@@ -1446,7 +1466,7 @@ void AspectFOV()
         }
         else if (!CutsceneFOVScanResult)
         {
-            spdlog::error("FOV: CutsceneFOV: Pattern scan failed.");
+            spdlog::error("AspectFOV: CutsceneFOV: Pattern scan failed.");
         }
     }
 }
