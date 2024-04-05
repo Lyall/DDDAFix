@@ -32,9 +32,7 @@ This is a fix for Dragon's Dogma: Dark Arisen that attempts to solve various iss
 ## Known Issues
 Please report any issues you see.
 This list will contain bugs which may or may not be fixed.
-- Mouse position is temporarily offset after interacting with the map.
-- Some HUD elements are misaligned at <16:9.
-- Map position is offset at <16:9.
+- Loaded map area is limited to 16:9.
 
 ## Screenshots
 
