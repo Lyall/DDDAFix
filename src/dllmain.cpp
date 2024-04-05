@@ -1014,6 +1014,10 @@ void Map()
                 {
                     ctx.xmm0.f32[0] = fHUDWidth;
                 }
+                else if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm0.f32[0] = (float)iResX / fAspectMultiplier;
+                }
             });
 
         static SafetyHookMid MapCursor2MidHook{};
@@ -1024,6 +1028,10 @@ void Map()
                 {
                     ctx.xmm5.f32[0] = fHUDWidth;
                 }
+                else if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm5.f32[0] = (float)iResX / fAspectMultiplier;
+                }
             });
 
         static SafetyHookMid MapCursor3MidHook{};
@@ -1033,6 +1041,10 @@ void Map()
                 if (fAspectRatio > fNativeAspect)
                 {
                     ctx.xmm1.f32[0] = fHUDWidth;
+                }
+                else if (fAspectRatio < fNativeAspect)
+                {
+                    ctx.xmm1.f32[0] = (float)iResX / fAspectMultiplier;
                 }
             });
     }
