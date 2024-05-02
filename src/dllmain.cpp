@@ -12,7 +12,7 @@ HMODULE thisModule;
 inipp::Ini<char> ini;
 std::shared_ptr<spdlog::logger> logger;
 string sFixName = "DDDAFix";
-string sFixVer = "0.9.0";
+string sFixVer = "0.9.1";
 string sLogFile = "DDDAFix.log";
 string sConfigFile = "DDDAFix.ini";
 string sExeName;
@@ -295,7 +295,17 @@ void HUD()
             {
                 if (ctx.edi + 0xD0)
                 {
-                    if ((ctx.xmm1.f32[0] == (float)1280 && *reinterpret_cast<float*>(ctx.edi + 0xD4) == (float)720))
+                    // Fix pesky blue dot at the top of HUD
+                    if ((ctx.xmm1.f32[0] == (float)24) && (*reinterpret_cast<float*>(ctx.edi + 0xD4) == (float)24) && (*reinterpret_cast<int*>(ctx.edi + 0xCC) == 0xFFF06E5A))
+                    {
+                        if (fAspectRatio < fNativeAspect)
+                        {
+                            ctx.xmm1.f32[0] = 0.0f;
+                            *reinterpret_cast<float*>(ctx.edi + 0xD4) = 0.0f;
+                        }
+                    }
+
+                    if ((ctx.xmm1.f32[0] == (float)1280) && (*reinterpret_cast<float*>(ctx.edi + 0xD4) == (float)720))
                     {
                         if (fAspectRatio > fNativeAspect)
                         {
